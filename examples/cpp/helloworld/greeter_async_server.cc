@@ -35,6 +35,8 @@
 #include <iostream>
 #include <string>
 #include <thread>
+//added
+#include <atomic>
 
 #include <grpc++/grpc++.h>
 #include <grpc/support/log.h>
@@ -51,6 +53,11 @@ using helloworld::HelloRequest;
 using helloworld::HelloReply;
 using helloworld::Greeter;
 
+
+std::atomic<long long> counter;
+// eventually make configs
+const std::string PORT = "73837";
+
 class ServerImpl final {
  public:
   ~ServerImpl() {
@@ -61,7 +68,7 @@ class ServerImpl final {
 
   // There is no shutdown handling in this code.
   void Run() {
-    std::string server_address("0.0.0.0:50051");
+    std::string server_address("0.0.0.0:" + PORT);
 
     ServerBuilder builder;
     // Listen on the given address without any authentication mechanism.
@@ -112,7 +119,7 @@ class ServerImpl final {
         new CallData(service_, cq_);
 
         // The actual processing.
-        std::string prefix("Hello ");
+        std::string prefix(std::to_string(counter.fetch_add(1, std::memory_order_relaxed)));
         reply_.set_message(prefix + request_.name());
 
         // And we are done! Let the gRPC runtime know we've finished, using the

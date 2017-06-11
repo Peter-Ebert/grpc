@@ -52,7 +52,6 @@ using helloworld::HelloRequest;
 using helloworld::HelloReply;
 using helloworld::Greeter;
 
-//using std;
 
 std::atomic<long long> counter;
 

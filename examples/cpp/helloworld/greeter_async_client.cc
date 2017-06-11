@@ -49,6 +49,9 @@ using helloworld::HelloRequest;
 using helloworld::HelloReply;
 using helloworld::Greeter;
 
+const std::string PORT = "73837";
+
+
 class GreeterClient {
  public:
   explicit GreeterClient(std::shared_ptr<Channel> channel)
@@ -119,7 +122,7 @@ int main(int argc, char** argv) {
   // localhost at port 50051). We indicate that the channel isn't authenticated
   // (use of InsecureChannelCredentials()).
   GreeterClient greeter(grpc::CreateChannel(
-      "localhost:50051", grpc::InsecureChannelCredentials()));
+      "localhost:" + PORT, grpc::InsecureChannelCredentials()));
   std::string user("world");
   std::string reply = greeter.SayHello(user);  // The actual RPC call!
   std::cout << "Greeter received: " << reply << std::endl;
