@@ -59,13 +59,13 @@ greeter_client: helloworld.pb.o helloworld.grpc.pb.o greeter_client.o
 greeter_server: helloworld.pb.o helloworld.grpc.pb.o greeter_server.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-greeter_async_client: helloworld.pb.o helloworld.grpc.pb.o greeter_async_client.o
+greeter_async_client: counting.pb.o counting.grpc.pb.o greeter_async_client.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 greeter_async_client2: helloworld.pb.o helloworld.grpc.pb.o greeter_async_client2.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-greeter_async_server: helloworld.pb.o helloworld.grpc.pb.o greeter_async_server.o
+greeter_async_server: counting.pb.o counting.grpc.pb.o greeter_async_server.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 .PRECIOUS: %.grpc.pb.cc
