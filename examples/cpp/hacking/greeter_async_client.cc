@@ -59,10 +59,10 @@ class CounterClient {
 
   // Assembles the client's payload, sends it and presents the response back
   // from the server.
-  std::string GetId(const std::string& user) {
+  std::string GetId(const std::string& keyname) {
     // Data we are sending to the server.
     IdRequest request;
-    request.set_name(user);
+    request.set_keyname(keyname);
 
     // Container for the data we expect from the server.
     IdReply reply;
@@ -104,7 +104,7 @@ class CounterClient {
 
     // Act upon the status of the actual RPC.
     if (status.ok()) {
-      return reply.message();
+      return reply.id();
     } else {
       return "RPC failed";
     }
@@ -123,9 +123,27 @@ int main(int argc, char** argv) {
   // (use of InsecureChannelCredentials()).
   CounterClient counter(grpc::CreateChannel(
       "localhost:" + PORT, grpc::InsecureChannelCredentials()));
-  std::string user("world");
-  std::string reply = counter.GetId(user);  // The actual RPC call!
-  std::cout << "Greeter received: " << reply << std::endl;
+
+
+  std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+  std::string reply;
+
+  for (int i = 0; i < 1000; i++) {
+
+    std::string keyname("hello.world");
+    reply = counter.GetId(keyname);  // The actual RPC call!
+    //std::cout << "Greeter received: " << reply << std::endl;
+
+  }
+
+  std::cout << "last value: " << reply << std::endl;
+
+  std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+
+  std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() <<std::endl;
+  std::cout << "Time difference = " << std::chrono::duration_cast<std::chrono::nanoseconds> (end - begin).count() <<std::endl;
+
 
   return 0;
 }

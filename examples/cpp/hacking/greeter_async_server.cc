@@ -53,7 +53,7 @@ using counting::IdReply;
 using counting::Counter;
 
 
-std::atomic<long long> counter;
+std::atomic<long long> counter = {1};
 
 // eventually make configs
 const std::string PORT = "73837";
@@ -120,7 +120,8 @@ class ServerImpl final {
 
         // The actual processing.
         std::string prefix(std::to_string(counter.fetch_add(1, std::memory_order_relaxed)));
-        reply_.set_message(prefix + request_.name());
+        //request_.keyname()
+        reply_.set_id(prefix);
 
         // And we are done! Let the gRPC runtime know we've finished, using the
         // memory address of this instance as the uniquely identifying tag for

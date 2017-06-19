@@ -39,30 +39,33 @@
 #include <grpc/support/log.h>
 #include <thread>
 
-#include "helloworld.grpc.pb.h"
+#include "counting.grpc.pb.h"
 
 using grpc::Channel;
 using grpc::ClientAsyncResponseReader;
 using grpc::ClientContext;
 using grpc::CompletionQueue;
 using grpc::Status;
-using helloworld::HelloRequest;
-using helloworld::HelloReply;
-using helloworld::Greeter;
+using counting::IdRequest;
+using counting::IdReply;
+using counting::Counter;
+// using helloworld::HelloRequest;
+// using helloworld::HelloReply;
+// using helloworld::Greeter;
 
 const std::string PORT = "73837";
 
 
-class GreeterClient {
+class CounterClient {
   public:
-    explicit GreeterClient(std::shared_ptr<Channel> channel)
-            : stub_(Greeter::NewStub(channel)) {}
+    explicit CounterClient(std::shared_ptr<Channel> channel)
+            : stub_(Counter::NewStub(channel)) {}
 
     // Assembles the client's payload and sends it to the server.
-    void SayHello(const std::string& user) {
+    void GetId(const std::string& keyname) {
         // Data we are sending to the server.
-        HelloRequest request;
-        request.set_name(user);
+        IdRequest request;
+        request.set_keyname(keyname);
 
         // Call object to store rpc data
         AsyncClientCall* call = new AsyncClientCall;
@@ -70,7 +73,7 @@ class GreeterClient {
         // stub_->AsyncSayHello() performs the RPC call, returning an instance to
         // store in "call". Because we are using the asynchronous API, we need to
         // hold on to the "call" instance in order to get updates on the ongoing RPC.
-        call->response_reader = stub_->AsyncSayHello(&call->context, request, &cq_);
+        call->response_reader = stub_->AsyncGetId(&call->context, request, &cq_);
 
 
         // Request that, upon completion of the RPC, "reply" be updated with the
@@ -96,7 +99,7 @@ class GreeterClient {
             GPR_ASSERT(ok);
 
             if (call->status.ok())
-                std::cout << "Greeter received: " << call->reply.message() << std::endl;
+                std::cout << "Greeter received: " << call->reply.id() << std::endl;
             else
                 std::cout << "RPC failed" << std::endl;
 
@@ -110,7 +113,7 @@ class GreeterClient {
     // struct for keeping state and data information
     struct AsyncClientCall {
         // Container for the data we expect from the server.
-        HelloReply reply;
+        IdReply reply;
 
         // Context for the client. It could be used to convey extra information to
         // the server and/or tweak certain RPC behaviors.
@@ -120,12 +123,12 @@ class GreeterClient {
         Status status;
 
 
-        std::unique_ptr<ClientAsyncResponseReader<HelloReply>> response_reader;
+        std::unique_ptr<ClientAsyncResponseReader<IdReply>> response_reader;
     };
 
     // Out of the passed in Channel comes the stub, stored here, our view of the
     // server's exposed services.
-    std::unique_ptr<Greeter::Stub> stub_;
+    std::unique_ptr<Counter::Stub> stub_;
 
     // The producer-consumer queue we use to communicate asynchronously with the
     // gRPC runtime.
@@ -139,19 +142,20 @@ int main(int argc, char** argv) {
     // are created. This channel models a connection to an endpoint (in this case,
     // localhost at port 50051). We indicate that the channel isn't authenticated
     // (use of InsecureChannelCredentials()).
-    GreeterClient greeter(grpc::CreateChannel(
+    CounterClient counter(grpc::CreateChannel(
             "localhost:" + PORT, grpc::InsecureChannelCredentials()));
 
     // Spawn reader thread that loops indefinitely
-    std::thread thread_ = std::thread(&GreeterClient::AsyncCompleteRpc, &greeter);
+    std::thread thread_ = std::thread(&CounterClient::AsyncCompleteRpc, &counter);
 
     for (int i = 0; i < 100; i++) {
-        std::string user("world " + std::to_string(i));
-        greeter.SayHello(user);  // The actual RPC call!
+        std::string keyname("hello.world");
+        counter.GetId(keyname);  // The actual RPC call!
     }
 
     std::cout << "Press control-c to quit" << std::endl << std::endl;
     thread_.join();  //blocks forever
+
 
     return 0;
 }
