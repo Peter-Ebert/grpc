@@ -45,9 +45,12 @@ service Counter {
 // The request message containing the user's name.
 message IdRequest {
   string keyname = 1;
+  uint32 size = 2;
 }
 
 // The response message containing the greetings
 message IdReply {
-  string id = 1;
+  string keyname = 1;
+  int64 value = 2;
+  uint32 size = 3;
 }

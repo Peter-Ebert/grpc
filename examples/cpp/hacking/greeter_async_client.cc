@@ -59,7 +59,7 @@ class CounterClient {
 
   // Assembles the client's payload, sends it and presents the response back
   // from the server.
-  std::string GetId(const std::string& keyname) {
+  std::int64_t GetId(const std::string& keyname) {
     // Data we are sending to the server.
     IdRequest request;
     request.set_keyname(keyname);
@@ -104,9 +104,9 @@ class CounterClient {
 
     // Act upon the status of the actual RPC.
     if (status.ok()) {
-      return reply.id();
+      return reply.value();
     } else {
-      return "RPC failed";
+      return 0;
     }
   }
 
@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
   for (int i = 0; i < 1000; i++) {
 
     std::string keyname("hello.world");
-    reply = counter.GetId(keyname);  // The actual RPC call!
+    reply = std::to_string(counter.GetId(keyname));  // The actual RPC call!
     //std::cout << "Greeter received: " << reply << std::endl;
 
   }

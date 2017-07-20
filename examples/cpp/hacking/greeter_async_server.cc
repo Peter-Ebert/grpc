@@ -69,6 +69,7 @@ class ServerImpl final {
   // There is no shutdown handling in this code.
   void Run() {
     std::string server_address("0.0.0.0:" + PORT);
+    //std::cout << std::boolalpha << std::atomic_is_lock_free(&counter);
 
     ServerBuilder builder;
     // Listen on the given address without any authentication mechanism.
@@ -119,9 +120,9 @@ class ServerImpl final {
         new CallData(service_, cq_);
 
         // The actual processing.
-        std::string prefix(std::to_string(counter.fetch_add(1, std::memory_order_relaxed)));
+        std::int64_t prefix(counter.fetch_add(1, std::memory_order_relaxed));
         //request_.keyname()
-        reply_.set_id(prefix);
+        reply_.set_value(prefix);
 
         // And we are done! Let the gRPC runtime know we've finished, using the
         // memory address of this instance as the uniquely identifying tag for
@@ -188,3 +189,4 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+
