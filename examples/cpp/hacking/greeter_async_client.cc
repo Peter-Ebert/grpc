@@ -59,10 +59,11 @@ class CounterClient {
 
   // Assembles the client's payload, sends it and presents the response back
   // from the server.
-  std::int64_t GetId(const std::string& keyname) {
+  std::int64_t GetId(const std::string& keyname, std::int64_t& size) {
     // Data we are sending to the server.
     IdRequest request;
     request.set_keyname(keyname);
+    request.set_size(size);
 
     // Container for the data we expect from the server.
     IdReply reply;
@@ -121,6 +122,18 @@ int main(int argc, char** argv) {
   // are created. This channel models a connection to an endpoint (in this case,
   // localhost at port 50051). We indicate that the channel isn't authenticated
   // (use of InsecureChannelCredentials()).
+
+  int loops = 1000;
+  int64_t size = 5;
+
+  if ( argc != 3 && argc !=0 ) {
+    std::cout << "usage: " << argv[0] <<" <loops> <batch_size>\n";
+  } else if (argc == 3) {
+    loops = std::atoi(argv[1]);
+    size = std::atoi(argv[2]);
+  }
+
+
   CounterClient counter(grpc::CreateChannel(
       "localhost:" + PORT, grpc::InsecureChannelCredentials()));
 
@@ -129,13 +142,13 @@ int main(int argc, char** argv) {
 
   std::string reply;
 
-  for (int i = 0; i < 1000; i++) {
+   for (int i = 0; i < loops; i++) {
 
     std::string keyname("hello.world");
-    reply = std::to_string(counter.GetId(keyname));  // The actual RPC call!
+    reply = std::to_string(counter.GetId(keyname, size));  // The actual RPC call!
     //std::cout << "Greeter received: " << reply << std::endl;
 
-  }
+   }
 
   std::cout << "last value: " << reply << std::endl;
 

@@ -120,9 +120,10 @@ class ServerImpl final {
         new CallData(service_, cq_);
 
         // The actual processing.
-        std::int64_t prefix(counter.fetch_add(1, std::memory_order_relaxed));
+        std::int64_t prefix(counter.fetch_add(request_.size(), std::memory_order_relaxed));
         //request_.keyname()
         reply_.set_value(prefix);
+        reply_.set_size(request_.size());
 
         // And we are done! Let the gRPC runtime know we've finished, using the
         // memory address of this instance as the uniquely identifying tag for
